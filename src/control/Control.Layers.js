@@ -353,14 +353,16 @@ export var Layers = Control.extend({
 
 		for (var i = inputs.length - 1; i >= 0; i--) {
 			input = inputs[i];
-			layer = this._getLayer(input.layerId).layer;
-			hasLayer = this._map.hasLayer(layer);
+			// in the event an input control is not part of baseLayer collection (e.g. a slider for opacity)
+			if (this._getLayer(input.layerId) != undefined){
+				layer = this._getLayer(input.layerId).layer;
+				hasLayer = this._map.hasLayer(layer);
+				if (input.checked && !hasLayer) {
+					addedLayers.push(layer);
 
-			if (input.checked && !hasLayer) {
-				addedLayers.push(layer);
-
-			} else if (!input.checked && hasLayer) {
-				removedLayers.push(layer);
+				} else if (!input.checked && hasLayer) {
+					removedLayers.push(layer);
+				}
 			}
 		}
 
@@ -381,13 +383,17 @@ export var Layers = Control.extend({
 		var inputs = this._form.getElementsByTagName('input'),
 		    input,
 		    layer,
-		    zoom = this._map.getZoom();
+	    zoom = this._map.getZoom();
 
 		for (var i = inputs.length - 1; i >= 0; i--) {
 			input = inputs[i];
-			layer = this._getLayer(input.layerId).layer;
-			input.disabled = (layer.options.minZoom !== undefined && zoom < layer.options.minZoom) ||
-			                 (layer.options.maxZoom !== undefined && zoom > layer.options.maxZoom);
+			// impossible to add base-layer opacity-slider (input type=range) with this in place
+			//if (input.type != 'range'){
+			if (this._getLayer(input.layerId) != undefined){
+				layer = this._getLayer(input.layerId).layer;
+				input.disabled = (layer.options.minZoom !== undefined && zoom < layer.options.minZoom) ||
+			                 	(layer.options.maxZoom !== undefined && zoom > layer.options.maxZoom);
+			}
 
 		}
 	},
